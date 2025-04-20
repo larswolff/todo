@@ -28,4 +28,8 @@ Route::middleware('auth')->group(function () {
 
     Volt::route('confirm-password', 'pages.auth.confirm-password')
         ->name('password.confirm');
+
+    // Add logout route
+    Volt::route('logout', 'pages.auth.logout')
+        ->name('logout');
 });
