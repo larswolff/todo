@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $id
  * @property int $user_id
  * @property string $name
+ * @property bool $in_menu
  * @property \Carbon\Carbon|null $reviewed_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -30,6 +31,7 @@ class Tag extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'in_menu',
         'reviewed_at',
     ];
 
@@ -39,6 +41,7 @@ class Tag extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'in_menu' => 'boolean',
         'reviewed_at' => 'datetime',
     ];
 
@@ -71,14 +74,51 @@ class Tag extends Model
      *
      * @param int $userId The user ID
      * @param string $name The tag name
+     * @param bool $inMenu Whether to show in menu
      * @return Tag The found or created tag
      */
-    public static function findOrCreateByName(int $userId, string $name): Tag
+    public static function findOrCreateByName(int $userId, string $name, bool $inMenu = false): Tag
     {
         return static::firstOrCreate(
             ['user_id' => $userId, 'name' => $name],
-            ['reviewed_at' => now()]
+            ['in_menu' => $inMenu, 'reviewed_at' => now()]
         );
+    }
+
+    /**
+     * Toggle the in_menu status.
+     *
+     * @return self
+     */
+    public function toggleInMenu(): self
+    {
+        $this->in_menu = !$this->in_menu;
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Set the tag to be shown in menu.
+     *
+     * @return self
+     */
+    public function showInMenu(): self
+    {
+        $this->in_menu = true;
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Set the tag to be hidden from menu.
+     *
+     * @return self
+     */
+    public function hideFromMenu(): self
+    {
+        $this->in_menu = false;
+        $this->save();
+        return $this;
     }
 
     /**

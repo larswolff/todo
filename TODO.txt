@@ -5,9 +5,16 @@ areas
 work/personal
 
 
-Inbox
-Next
-Projects
-Tags
-Review
-Waiting
+Inbox - new tasks without a project
+Today - ready tasks with defer or due date set to today or in the past
+Next - all tasks with status next
+Projects - all projects
+Areas - All areas, like "Private"
+Tags - all tags
+Review - projects and tags ready for review
+Waiting - Task with status waiting
+Upcoming - Tasks in the future
+Someday - tasks and projects with status "Someday"
+--
+Tag list with in_menu true
+

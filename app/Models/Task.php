@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $status
  * @property int $sequence_order
  * @property string|null $recurrence_rule
- * @property bool $flagged
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read \App\Models\User $user
@@ -44,7 +43,6 @@ class Task extends Model
         'status',
         'sequence_order',
         'recurrence_rule',
-        'flagged',
     ];
 
     /**
@@ -55,7 +53,6 @@ class Task extends Model
     protected $casts = [
         'defer_date' => 'date',
         'due_date' => 'date',
-        'flagged' => 'boolean',
     ];
 
     /**
@@ -106,30 +103,6 @@ class Task extends Model
     {
         $tagId = $tag instanceof Tag ? $tag->id : $tag;
         $this->tags()->detach($tagId);
-    }
-
-    /**
-     * Flag the task.
-     *
-     * @return self
-     */
-    public function flag(): self
-    {
-        $this->flagged = true;
-        $this->save();
-        return $this;
-    }
-
-    /**
-     * Unflag the task.
-     *
-     * @return self
-     */
-    public function unflag(): self
-    {
-        $this->flagged = false;
-        $this->save();
-        return $this;
     }
 
     /**

@@ -95,6 +95,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Get tags that should appear in the menu.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getMenuTags()
+    {
+        return $this->tags()->where('in_menu', true)->orderBy('name')->get();
+    }
+
+    /**
      * Get the reference materials for the user.
      */
     public function referenceMaterials(): HasMany
@@ -150,11 +160,12 @@ class User extends Authenticatable
      * Find or create a tag by name for this user.
      *
      * @param string $name
+     * @param bool $inMenu Whether to show in menu
      * @return \App\Models\Tag
      */
-    public function findOrCreateTag(string $name): Tag
+    public function findOrCreateTag(string $name, bool $inMenu = false): Tag
     {
-        return Tag::findOrCreateByName($this->id, $name);
+        return Tag::findOrCreateByName($this->id, $name, $inMenu);
     }
 
     /**
@@ -179,19 +190,6 @@ class User extends Authenticatable
     {
         return $this->tasks()
             ->whereDate('due_date', '<', today())
-            ->where('status', '!=', 'completed')
-            ->get();
-    }
-
-    /**
-     * Get flagged tasks.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getFlaggedTasks()
-    {
-        return $this->tasks()
-            ->where('flagged', true)
             ->where('status', '!=', 'completed')
             ->get();
     }
