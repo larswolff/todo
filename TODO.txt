@@ -3,3 +3,11 @@ review
 
 areas
 work/personal
+
+
+Inbox
+Next
+Projects
+Tags
+Review
+Waiting
