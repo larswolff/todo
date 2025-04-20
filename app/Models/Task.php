@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string|null $note
  * @property \Carbon\Carbon|null $defer_date
  * @property \Carbon\Carbon|null $due_date
- * @property string $status
+ * @property TaskStatus $status
  * @property int $sequence_order
  * @property string|null $recurrence_rule
  * @property \Carbon\Carbon $created_at
@@ -53,6 +54,7 @@ class Task extends Model
     protected $casts = [
         'defer_date' => 'date',
         'due_date' => 'date',
+        'status' => TaskStatus::class,
     ];
 
     /**
@@ -112,24 +114,68 @@ class Task extends Model
      */
     public function markAsCompleted(): self
     {
-        $this->status = 'completed';
+        $this->status = TaskStatus::COMPLETED;
         $this->save();
 
         // If this task is part of a sequential project, update next task
         if ($this->project && $this->project->is_sequential) {
             $nextTask = $this->project->tasks()
                 ->where('id', '!=', $this->id)
-                ->where('status', '!=', 'completed')
+                ->whereNot('status', TaskStatus::COMPLETED->value)
                 ->orderBy('sequence_order')
                 ->first();
 
             if ($nextTask) {
-                $nextTask->status = 'next';
+                $nextTask->status = TaskStatus::NEXT;
                 $nextTask->save();
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Mark the task as waiting.
+     *
+     * @return self
+     */
+    public function markAsWaiting(): self
+    {
+        $this->status = TaskStatus::WAITING;
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Mark the task as next.
+     *
+     * @return self
+     */
+    public function markAsNext(): self
+    {
+        $this->status = TaskStatus::NEXT;
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Check if the task is active.
+     *
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->status->isActive();
+    }
+
+    /**
+     * Check if the task is completed.
+     * 
+     * @return bool
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status->isCompleted();
     }
 
     /**
@@ -146,7 +192,7 @@ class Task extends Model
 
         // Basic implementation - would need proper recurrence rule parsing in production
         $newTask = $this->replicate(['status']);
-        $newTask->status = 'ready';
+        $newTask->status = TaskStatus::READY;
         
         // If the task has a due date, calculate the next one
         if ($this->due_date) {

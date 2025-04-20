@@ -1,16 +1,4 @@
 mail in
 
-Now we need to work on the dashboard. We are using Tailwind CSS. The first part is to create a global menu when logged in, this menu links to the major pages in the app. These pages do not exists yet - dont create them! The menu should be a column at the left side of the screen, and the visiblilty should be togglable like a hamburger menu. At md at lower the menu should be hidden by default, and on bigger screen it should default to visible. The column should be full height and have a different background color than the Detail/page area. It should be with limited to something reasonable. The active menu item in the menu should be highlighed even at subpages. To clarify, "Projects" should be highlighted both at /projects and at /project/1. Here are the items for the menu:
-
-Inbox - new tasks without a project
-Today - ready tasks with defer or due date set to today or in the past
-Next - all tasks with status next
-Projects - all projects
-Areas - All areas, like "Private"
-Tags - all tags
-Review - projects and tags ready for review
-Waiting - Task with status waiting
-Upcoming - Tasks in the future
-Someday - tasks and projects with status "Someday"
---
-Lastly the name field from all the Tag models that has in_menu true
+Now create the inbox page and make it work from the menu. It should list all tasks with project_id null for this user. Also status must not be
+completed

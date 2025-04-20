@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStatus;
+use App\Enums\TaskStatus;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -177,7 +179,7 @@ class User extends Authenticatable
     {
         return $this->tasks()
             ->whereDate('due_date', today())
-            ->where('status', '!=', 'completed')
+            ->whereNot('status', TaskStatus::COMPLETED->value)
             ->get();
     }
 
@@ -190,7 +192,7 @@ class User extends Authenticatable
     {
         return $this->tasks()
             ->whereDate('due_date', '<', today())
-            ->where('status', '!=', 'completed')
+            ->whereNot('status', TaskStatus::COMPLETED->value)
             ->get();
     }
 
@@ -203,13 +205,13 @@ class User extends Authenticatable
     {
         // First get all tasks explicitly marked as 'next'
         $nextTasks = $this->tasks()
-            ->where('status', 'next')
+            ->where('status', TaskStatus::NEXT->value)
             ->get();
 
         // Then get the next task from each sequential project
         $sequentialProjects = $this->projects()
             ->where('is_sequential', true)
-            ->where('status', 'ready')
+            ->where('status', ProjectStatus::READY->value)
             ->get();
 
         foreach ($sequentialProjects as $project) {
@@ -217,5 +219,41 @@ class User extends Authenticatable
         }
 
         return $nextTasks;
+    }
+
+    /**
+     * Get waiting tasks.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getWaitingTasks()
+    {
+        return $this->tasks()
+            ->where('status', TaskStatus::WAITING->value)
+            ->get();
+    }
+
+    /**
+     * Get someday tasks.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getSomedayTasks()
+    {
+        return $this->tasks()
+            ->where('status', TaskStatus::SOMEDAY->value)
+            ->get();
+    }
+
+    /**
+     * Get someday projects.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getSomedayProjects()
+    {
+        return $this->projects()
+            ->where('status', ProjectStatus::SOMEDAY->value)
+            ->get();
     }
 }

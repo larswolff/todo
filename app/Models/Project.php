@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Carbon\Carbon|null $due_date
  * @property \Carbon\Carbon|null $reviewed_at
  * @property bool $is_sequential
- * @property string $status
+ * @property ProjectStatus $status
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read \App\Models\User $user
@@ -57,6 +58,7 @@ class Project extends Model
         'due_date' => 'date',
         'reviewed_at' => 'datetime',
         'is_sequential' => 'boolean',
+        'status' => ProjectStatus::class,
     ];
 
     /**
@@ -124,7 +126,7 @@ class Project extends Model
      */
     public function markAsCompleted(): self
     {
-        $this->status = 'completed';
+        $this->status = ProjectStatus::COMPLETED;
         $this->save();
         return $this;
     }
@@ -155,6 +157,16 @@ class Project extends Model
     }
 
     /**
+     * Check if the project is active.
+     *
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->status->isActive();
+    }
+
+    /**
      * Get the next tasks in this project.
      * For sequential projects, returns the next uncompleted task.
      * For parallel projects, returns all uncompleted tasks.
@@ -165,12 +177,12 @@ class Project extends Model
     {
         if ($this->is_sequential) {
             return $this->tasks()
-                ->where('status', '!=', 'completed')
+                ->whereNot('status', 'completed')
                 ->orderBy('sequence_order')
                 ->limit(1)
                 ->get();
         }
 
-        return $this->tasks()->where('status', '!=', 'completed')->get();
+        return $this->tasks()->whereNot('status', 'completed')->get();
     }
 }
